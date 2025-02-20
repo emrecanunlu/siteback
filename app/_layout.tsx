@@ -1,16 +1,25 @@
-import '~/global.css';
+import "~/global.css";
 
-import { DarkTheme, DefaultTheme, Theme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import * as React from 'react';
-import { Platform } from 'react-native';
-import { NAV_THEME } from '~/lib/constants';
-import { useColorScheme } from '~/lib/useColorScheme';
-import { PortalHost } from '@rn-primitives/portal';
-import { ThemeToggle } from '~/components/ThemeToggle';
-import { setAndroidNavigationBar } from '~/lib/android-navigation-bar';
-
+import {
+  DarkTheme,
+  DefaultTheme,
+  Theme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { router, Slot, Stack, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import * as React from "react";
+import { Platform } from "react-native";
+import { NAV_THEME } from "~/lib/constants";
+import { useColorScheme } from "~/lib/useColorScheme";
+import { PortalHost } from "@rn-primitives/portal";
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider, useAuth } from "~/providers/auth-providers";
+import * as SplashScreen from "expo-splash-screen";
+import AppLoader from "~/components/AppLoader";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
@@ -23,7 +32,36 @@ const DARK_THEME: Theme = {
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from 'expo-router';
+} from "expo-router";
+
+SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient();
+
+const InitialLayout = () => {
+  const hasMounted = React.useRef(false);
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+
+  // İlk yükleme için useEffect
+  React.useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    SplashScreen.hideAsync();
+
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (inAuthGroup && user) {
+      router.replace("/");
+    } else if (!inAuthGroup && !user) {
+      router.replace("/welcome");
+    }
+  }, [loading, user]);
+
+  return <Slot />;
+};
 
 export default function RootLayout() {
   const hasMounted = React.useRef(false);
@@ -35,9 +73,9 @@ export default function RootLayout() {
       return;
     }
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === "web") {
       // Adds the background color to the html element to prevent white background on overscroll.
-      document.documentElement.classList.add('bg-background');
+      document.documentElement.classList.add("bg-background");
     }
     setAndroidNavigationBar(colorScheme);
     setIsColorSchemeLoaded(true);
@@ -49,21 +87,23 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <StatusBar style={isDarkColorScheme ? 'light' : 'dark'} />
-      <Stack>
-        <Stack.Screen
-          name='index'
-          options={{
-            title: 'Starter Base',
-            headerRight: () => <ThemeToggle />,
-          }}
-        />
-      </Stack>
-      <PortalHost />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+            <AuthProvider>
+              <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+              <InitialLayout />
+              <PortalHost />
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const useIsomorphicLayoutEffect =
-  Platform.OS === 'web' && typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+  Platform.OS === "web" && typeof window === "undefined"
+    ? React.useEffect
+    : React.useLayoutEffect;
