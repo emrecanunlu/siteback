@@ -63,27 +63,6 @@ export default function Welcome() {
     );
   };
 
-  useEffect(() => {
-    (async () => {
-      const response = await fetch(
-        process.env.EXPO_PUBLIC_SERVER_URL + "/api/Auth/OTPLogin",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            phone: "+905555555555",
-          }),
-        }
-      );
-
-      console.log(response.status);
-
-      const data = await response.json();
-    })();
-  }, []);
-
   return (
     <View className="flex-1">
       <View className="absolute inset-0">

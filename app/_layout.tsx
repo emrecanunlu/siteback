@@ -20,6 +20,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AppLoader from "~/components/AppLoader";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
@@ -42,6 +43,12 @@ const InitialLayout = () => {
   const hasMounted = React.useRef(false);
   const { user, loading } = useAuth();
   const segments = useSegments();
+
+  React.useEffect(() => {
+    (async () => {
+      await AsyncStorage.clear();
+    })();
+  }, []);
 
   // İlk yükleme için useEffect
   React.useEffect(() => {

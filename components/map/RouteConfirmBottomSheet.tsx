@@ -1,17 +1,9 @@
-import {
-  useCallback,
-  forwardRef,
-  useMemo,
-  useRef,
-  useState,
-  useEffect,
-} from "react";
+import { useCallback, forwardRef, useMemo, useRef } from "react";
 import { Text } from "../ui/text";
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
   BottomSheetModal,
-  BottomSheetModalProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,13 +12,16 @@ import { SelectedRegion } from "~/types/Map";
 import { getDistance } from "geolib";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
+import { Button } from "../ui/button";
+
 type Props = {
   pickupLocation: SelectedRegion;
   dropoffLocation: SelectedRegion;
+  onEdit: () => void;
 };
 
 const RouteConfirmBottomSheet = forwardRef<BottomSheetModal, Props>(
-  ({ pickupLocation, dropoffLocation }, ref) => {
+  ({ pickupLocation, dropoffLocation, onEdit }, ref) => {
     const { bottom } = useSafeAreaInsets();
 
     const mapViewRef = useRef<MapView>(null);
@@ -86,10 +81,26 @@ const RouteConfirmBottomSheet = forwardRef<BottomSheetModal, Props>(
                   onReady={(result) => {
                     mapViewRef.current?.fitToCoordinates(result.coordinates, {
                       animated: false,
+                      edgePadding: {
+                        top: 25,
+                        bottom: 25,
+                        left: 25,
+                        right: 25,
+                      },
                     });
                   }}
                 />
               </MapView>
+            </View>
+
+            <View className="flex-row gap-x-2 mt-8">
+              <Button className="flex-1">
+                <Text>Continue</Text>
+              </Button>
+
+              <Button className="w-32" variant="outline" onPress={onEdit}>
+                <Text>Edit</Text>
+              </Button>
             </View>
           </View>
         </BottomSheetView>

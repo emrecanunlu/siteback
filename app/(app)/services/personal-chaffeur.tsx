@@ -28,7 +28,6 @@ export default function PersonalChaffeur() {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     Currency.USD
   );
-  const [loading, setLoading] = useState<boolean>(false);
   const [pickupLocation, setPickupLocation] = useState<SelectedRegion | null>(
     null
   );
@@ -116,11 +115,8 @@ export default function PersonalChaffeur() {
           <PickupLocationView
             address={address}
             onConfirm={async () => {
-              if (!region || !address) return;
-
-              setLoading(true);
-              await delay(500);
-              setLoading(false);
+              if (!region || !address || !pickupLocation || !dropoffLocation)
+                return;
 
               setPickupLocation({
                 latitude: region.latitude,
@@ -140,6 +136,13 @@ export default function PersonalChaffeur() {
             dropoffLocation={dropoffLocation}
             currency={selectedCurrency}
             onCurrencyChange={setSelectedCurrency}
+            goBack={() => {
+              zoomLocation({
+                latitude: dropoffLocation.latitude,
+                longitude: dropoffLocation.longitude,
+              });
+              setStep(0);
+            }}
           />
         );
     }
@@ -217,12 +220,7 @@ export default function PersonalChaffeur() {
               optimizeWaypoints
               onReady={(result) => {
                 mapViewRef.current?.fitToCoordinates(result.coordinates, {
-                  edgePadding: {
-                    top: 50,
-                    bottom: 50,
-                    left: 50,
-                    right: 50,
-                  },
+                  edgePadding: { top: 50, bottom: 50, left: 50, right: 50 },
                 });
               }}
             />
@@ -247,8 +245,6 @@ export default function PersonalChaffeur() {
       >
         <View className="p-6">{renderBottomView()}</View>
       </View>
-
-      <AppLoader loading={loading} />
     </View>
   );
 }

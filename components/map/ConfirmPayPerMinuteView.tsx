@@ -13,6 +13,7 @@ type Props = {
   dropoffLocation: SelectedRegion;
   currency: Currency;
   onCurrencyChange: (currency: Currency) => void;
+  goBack: () => void;
 };
 
 export default function ConfirmPayPerMinuteView({
@@ -20,6 +21,7 @@ export default function ConfirmPayPerMinuteView({
   dropoffLocation,
   currency,
   onCurrencyChange,
+  goBack,
 }: Props) {
   const getCurrentCurrency = useCallback(() => {
     return currencies.find((c) => c.value === currency);
@@ -97,6 +99,7 @@ export default function ConfirmPayPerMinuteView({
         ref={bottomSheetRef}
         pickupLocation={pickupLocation}
         dropoffLocation={dropoffLocation}
+        onEdit={() => goBack()}
       />
     </View>
   );
