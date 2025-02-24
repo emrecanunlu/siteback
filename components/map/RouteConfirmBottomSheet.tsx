@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "react-native";
 import { SelectedRegion } from "~/types/Map";
 import { getDistance } from "geolib";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { Button } from "../ui/button";
 
@@ -18,10 +18,11 @@ type Props = {
   pickupLocation: SelectedRegion;
   dropoffLocation: SelectedRegion;
   onEdit: () => void;
+  onContinue: () => void;
 };
 
 const RouteConfirmBottomSheet = forwardRef<BottomSheetModal, Props>(
-  ({ pickupLocation, dropoffLocation, onEdit }, ref) => {
+  ({ pickupLocation, dropoffLocation, onEdit, onContinue }, ref) => {
     const { bottom } = useSafeAreaInsets();
 
     const mapViewRef = useRef<MapView>(null);
@@ -82,19 +83,33 @@ const RouteConfirmBottomSheet = forwardRef<BottomSheetModal, Props>(
                     mapViewRef.current?.fitToCoordinates(result.coordinates, {
                       animated: false,
                       edgePadding: {
-                        top: 25,
-                        bottom: 25,
-                        left: 25,
-                        right: 25,
+                        top: 50,
+                        bottom: 50,
+                        left: 0,
+                        right: 0,
                       },
                     });
+                  }}
+                />
+
+                <Marker
+                  coordinate={{
+                    latitude: pickupLocation.latitude,
+                    longitude: pickupLocation.longitude,
+                  }}
+                />
+
+                <Marker
+                  coordinate={{
+                    latitude: dropoffLocation.latitude,
+                    longitude: dropoffLocation.longitude,
                   }}
                 />
               </MapView>
             </View>
 
             <View className="flex-row gap-x-2 mt-8">
-              <Button className="flex-1">
+              <Button className="flex-1" onPress={onContinue}>
                 <Text>Continue</Text>
               </Button>
 

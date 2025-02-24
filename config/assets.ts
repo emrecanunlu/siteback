@@ -8,4 +8,5 @@ export const Icons = {
   Chaffeur: require("../assets/icons/chauffeur.png"),
   Pin: require("../assets/icons/pin.png"),
   PinFlag: require("../assets/icons/pin-flag.png"),
+  SedanCar: require("../assets/icons/sedan-car.png"),
 };

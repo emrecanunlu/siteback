@@ -1,13 +1,18 @@
-import { View } from "react-native";
+import { View, Image, Pressable, TouchableOpacity } from "react-native";
 import { Text } from "../ui/text";
 import { SelectedRegion } from "~/types/Map";
 import { Currency } from "~/types/Enum";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { currencies } from "~/utils/data";
 import { Button } from "../ui/button";
 import RouteConfirmBottomSheet from "./RouteConfirmBottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import AppLoader from "../AppLoader";
+import { router } from "expo-router";
+import { Car } from "~/lib/icons/Car";
+import { Icons } from "~/config/assets";
+import { ChevronRight } from "~/lib/icons/ChevronRight";
 type Props = {
   pickupLocation: SelectedRegion;
   dropoffLocation: SelectedRegion;
@@ -16,6 +21,8 @@ type Props = {
   goBack: () => void;
 };
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function ConfirmPayPerMinuteView({
   pickupLocation,
   dropoffLocation,
@@ -23,11 +30,20 @@ export default function ConfirmPayPerMinuteView({
   onCurrencyChange,
   goBack,
 }: Props) {
+  const [loading, setLoading] = useState<boolean>(false);
+
   const getCurrentCurrency = useCallback(() => {
     return currencies.find((c) => c.value === currency);
   }, [currency]);
 
   const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const handleBookNow = useCallback(async () => {
+    setLoading(true);
+    await delay(500);
+    setLoading(false);
+    bottomSheetRef.current?.present();
+  }, []);
 
   return (
     <View>
@@ -48,7 +64,7 @@ export default function ConfirmPayPerMinuteView({
         </Text>
       </View>
 
-      <View className="py-4">
+      <View className="mt-2">
         <Text className="font-semibold text-lg mb-2">Currency Types</Text>
         <ToggleGroup
           value={getCurrentCurrency()?.name ?? ""}
@@ -73,7 +89,27 @@ export default function ConfirmPayPerMinuteView({
         </ToggleGroup>
       </View>
 
-      <View className="py-4 mb-4">
+      <View className="mb-2 mt-4">
+        <Text className="font-semibold text-lg mb-2">Selected Vehicle</Text>
+        <TouchableOpacity
+          className="flex-row items-center justify-between pr-4 pl-2"
+          onPress={() => router.push("/vehicle/list")}
+        >
+          <View className="flex-row items-center gap-x-4">
+            <Image source={Icons.SedanCar} className="w-12 h-12 rounded-lg" />
+
+            <View className="flex-1">
+              <Text className="font-medium">Choose Car</Text>
+              {/* <Text className="text-sm font-medium text-primary/50">
+                35 PIR 61
+              </Text> */}
+            </View>
+          </View>
+          <ChevronRight size={18} className="text-primary" />
+        </TouchableOpacity>
+      </View>
+
+      <View className="py-4 mb-4 px-2">
         <View className="flex-row items-center gap-x-3">
           <View className="w-4 h-4 rounded-full border-2 border-primary"></View>
           <Text className="flex-1" numberOfLines={1}>
@@ -91,7 +127,7 @@ export default function ConfirmPayPerMinuteView({
         </View>
       </View>
 
-      <Button onPress={() => bottomSheetRef.current?.present()}>
+      <Button onPress={handleBookNow}>
         <Text>Book Now</Text>
       </Button>
 
@@ -99,8 +135,15 @@ export default function ConfirmPayPerMinuteView({
         ref={bottomSheetRef}
         pickupLocation={pickupLocation}
         dropoffLocation={dropoffLocation}
-        onEdit={() => goBack()}
+        onEdit={goBack}
+        onContinue={() => {
+          bottomSheetRef.current?.dismiss();
+
+          router.push("/vehicle");
+        }}
       />
+
+      <AppLoader loading={loading} />
     </View>
   );
 }

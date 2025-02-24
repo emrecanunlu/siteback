@@ -1,6 +1,13 @@
 import { Stack } from "expo-router";
+import { useAuth } from "~/providers/auth-providers";
 
 export default function AppLayout() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <Stack
       screenOptions={{
@@ -19,6 +26,20 @@ export default function AppLayout() {
         name="profile"
         options={{
           title: "Edit Profile",
+        }}
+      />
+      <Stack.Screen
+        name="vehicle/list"
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="vehicle/create"
+        options={{
+          presentation: "modal",
+          headerShown: false,
         }}
       />
     </Stack>

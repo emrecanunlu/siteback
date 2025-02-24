@@ -40,15 +40,8 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 const InitialLayout = () => {
-  const hasMounted = React.useRef(false);
   const { user, loading } = useAuth();
   const segments = useSegments();
-
-  React.useEffect(() => {
-    (async () => {
-      await AsyncStorage.clear();
-    })();
-  }, []);
 
   // İlk yükleme için useEffect
   React.useEffect(() => {
@@ -57,6 +50,8 @@ const InitialLayout = () => {
     }
 
     SplashScreen.hideAsync();
+
+    console.log("hide");
 
     const inAuthGroup = segments[0] === "(auth)";
 

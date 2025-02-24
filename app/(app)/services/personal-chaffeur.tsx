@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
@@ -37,6 +37,7 @@ export default function PersonalChaffeur() {
   const [step, setStep] = useState<number>(0);
   const [region, setRegion] = useState<Region | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { location } = useLocation();
   const { bottom, top } = useSafeAreaInsets();
@@ -115,15 +116,19 @@ export default function PersonalChaffeur() {
           <PickupLocationView
             address={address}
             onConfirm={async () => {
-              if (!region || !address || !pickupLocation || !dropoffLocation)
-                return;
+              if (!region || !address) return;
 
+              setIsLoading(true);
               setPickupLocation({
                 latitude: region.latitude,
                 longitude: region.longitude,
                 address,
               });
+
+              // Kısa bir loading göster
+              await delay(500);
               setStep(2);
+              setIsLoading(false);
             }}
           />
         );
@@ -245,6 +250,7 @@ export default function PersonalChaffeur() {
       >
         <View className="p-6">{renderBottomView()}</View>
       </View>
+      <AppLoader loading={isLoading} />
     </View>
   );
 }

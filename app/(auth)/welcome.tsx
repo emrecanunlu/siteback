@@ -14,9 +14,9 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import countries from "~/assets/countries.json";
 import { Input } from "~/components/ui/input";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ChevronDown } from "~/lib/icons/ChevronDown";
-import { router, useRouter } from "expo-router";
+import { router } from "expo-router";
 import { useLoginOTP } from "~/hooks/queries";
 
 export default function Welcome() {
