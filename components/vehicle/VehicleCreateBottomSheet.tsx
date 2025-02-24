@@ -14,6 +14,10 @@ import { BottomSheetInput } from "../ui/bottomsheet-input";
 import { Controller, useForm } from "react-hook-form";
 import yup from "~/lib/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useCreateVehicle } from "~/hooks/queries";
+import { useQueryClient } from "@tanstack/react-query";
+
+type Props = {};
 
 type FormData = {
   brand: string;
@@ -22,8 +26,6 @@ type FormData = {
   transmissionType: "automatic" | "manual";
   comprehensiveInsurance: boolean;
 };
-
-type Props = {};
 
 const schema = yup.object({
   brand: yup.string().required(""),
@@ -35,6 +37,10 @@ const schema = yup.object({
 
 const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
   (props, ref) => {
+    const queryClient = useQueryClient();
+    const mutation = useCreateVehicle();
+    const bottomSheetRef = ref as React.MutableRefObject<BottomSheetModal>;
+
     const {
       control,
       handleSubmit: onSubmit,
@@ -67,7 +73,24 @@ const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
     );
 
     const handleSubmit = onSubmit((data) => {
-      console.log(data);
+      mutation.mutate(
+        {
+          brand: data.brand,
+          model: data.model,
+          plateNumber: data.plateNumber,
+          isManual: data.transmissionType === "manual",
+          hasInsurance: data.comprehensiveInsurance,
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["getVehicles"] });
+            bottomSheetRef.current?.dismiss();
+          },
+          onError: (error) => {
+            console.log(error);
+          },
+        }
+      );
     });
 
     return (

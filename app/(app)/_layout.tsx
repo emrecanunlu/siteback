@@ -28,18 +28,12 @@ export default function AppLayout() {
           title: "Edit Profile",
         }}
       />
-      <Stack.Screen
-        name="vehicle/list"
-        options={{
-          headerShown: false,
-        }}
-      />
 
       <Stack.Screen
-        name="vehicle/create"
+        name="vehicle"
         options={{
           presentation: "modal",
-          headerShown: false,
+          title: "Your Cars",
         }}
       />
     </Stack>

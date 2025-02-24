@@ -13,6 +13,7 @@ import { getDistance } from "geolib";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import { Button } from "../ui/button";
+import { useLocalSearchParams } from "expo-router";
 
 type Props = {
   pickupLocation: SelectedRegion;

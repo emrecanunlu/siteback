@@ -3,22 +3,24 @@ import { Text } from "../ui/text";
 import { SelectedRegion } from "~/types/Map";
 import { Currency } from "~/types/Enum";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { currencies } from "~/utils/data";
 import { Button } from "../ui/button";
 import RouteConfirmBottomSheet from "./RouteConfirmBottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import AppLoader from "../AppLoader";
 import { router } from "expo-router";
-import { Car } from "~/lib/icons/Car";
 import { Icons } from "~/config/assets";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
+import { useGetVehicles } from "~/hooks/queries";
 type Props = {
   pickupLocation: SelectedRegion;
   dropoffLocation: SelectedRegion;
   currency: Currency;
   onCurrencyChange: (currency: Currency) => void;
   goBack: () => void;
+  vehicleId: number | null;
+  onContinue: () => void;
 };
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -29,7 +31,11 @@ export default function ConfirmPayPerMinuteView({
   currency,
   onCurrencyChange,
   goBack,
+  vehicleId,
+  onContinue,
 }: Props) {
+  const { data: result } = useGetVehicles();
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const getCurrentCurrency = useCallback(() => {
@@ -44,6 +50,10 @@ export default function ConfirmPayPerMinuteView({
     setLoading(false);
     bottomSheetRef.current?.present();
   }, []);
+
+  const selectedVehicle = useMemo(() => {
+    return result?.data?.find((v) => v.id === vehicleId);
+  }, [result, vehicleId]);
 
   return (
     <View>
@@ -93,16 +103,22 @@ export default function ConfirmPayPerMinuteView({
         <Text className="font-semibold text-lg mb-2">Selected Vehicle</Text>
         <TouchableOpacity
           className="flex-row items-center justify-between pr-4 pl-2"
-          onPress={() => router.push("/vehicle/list")}
+          onPress={() => router.push("/vehicle")}
         >
           <View className="flex-row items-center gap-x-4">
             <Image source={Icons.SedanCar} className="w-12 h-12 rounded-lg" />
 
             <View className="flex-1">
-              <Text className="font-medium">Choose Car</Text>
-              {/* <Text className="text-sm font-medium text-primary/50">
-                35 PIR 61
-              </Text> */}
+              <Text className="font-medium">
+                {selectedVehicle
+                  ? `${selectedVehicle.brand} - ${selectedVehicle.model}`
+                  : "Choose Car"}
+              </Text>
+              {selectedVehicle && (
+                <Text className="text-sm font-medium text-primary/50">
+                  {selectedVehicle.plateNumber}
+                </Text>
+              )}
             </View>
           </View>
           <ChevronRight size={18} className="text-primary" />
@@ -127,7 +143,7 @@ export default function ConfirmPayPerMinuteView({
         </View>
       </View>
 
-      <Button onPress={handleBookNow}>
+      <Button onPress={handleBookNow} disabled={!vehicleId}>
         <Text>Book Now</Text>
       </Button>
 
@@ -136,11 +152,7 @@ export default function ConfirmPayPerMinuteView({
         pickupLocation={pickupLocation}
         dropoffLocation={dropoffLocation}
         onEdit={goBack}
-        onContinue={() => {
-          bottomSheetRef.current?.dismiss();
-
-          router.push("/vehicle");
-        }}
+        onContinue={onContinue}
       />
 
       <AppLoader loading={loading} />

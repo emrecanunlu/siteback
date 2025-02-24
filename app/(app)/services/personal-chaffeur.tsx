@@ -21,10 +21,13 @@ import MapViewDirections from "react-native-maps-directions";
 import AppLoader from "~/components/AppLoader";
 import { SelectedRegion } from "~/types/Map";
 import { Currency } from "~/types/Enum";
-
+import { Text } from "~/components/ui/text";
+import { Vehicle } from "~/types/Vehicle";
+import FindChauffeur from "~/components/map/FindChauffeur";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function PersonalChaffeur() {
+  const [vehicleId, setVehicleId] = useState<number | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(
     Currency.USD
   );
@@ -43,6 +46,8 @@ export default function PersonalChaffeur() {
   const { bottom, top } = useSafeAreaInsets();
 
   const mapViewRef = useRef<MapView>(null);
+
+  const params = useLocalSearchParams<{ vehicleId?: string }>();
 
   const getCurrentLocationAddress = async (region: Region) => {
     const response = await fetch(
@@ -84,6 +89,9 @@ export default function PersonalChaffeur() {
           latitude: pickupLocation.latitude,
           longitude: pickupLocation.longitude,
         });
+        break;
+      case 3:
+        setStep(2);
         break;
       default:
         break;
@@ -137,6 +145,10 @@ export default function PersonalChaffeur() {
 
         return (
           <ConfirmPayPerMinuteView
+            onContinue={() => {
+              setStep(3);
+            }}
+            vehicleId={vehicleId}
             pickupLocation={pickupLocation}
             dropoffLocation={dropoffLocation}
             currency={selectedCurrency}
@@ -150,6 +162,10 @@ export default function PersonalChaffeur() {
             }}
           />
         );
+      case 3:
+        if (!pickupLocation || !dropoffLocation) return null;
+
+        return <FindChauffeur />;
     }
   };
 
@@ -170,6 +186,12 @@ export default function PersonalChaffeur() {
       longitude: location.coords.longitude,
     });
   }, [location]);
+
+  useEffect(() => {
+    if (params.vehicleId) {
+      setVehicleId(parseInt(params.vehicleId));
+    }
+  }, [params.vehicleId]);
 
   return (
     <View className="flex-1">
@@ -217,6 +239,7 @@ export default function PersonalChaffeur() {
 
           {pickupLocation && dropoffLocation && step >= 2 && (
             <MapViewDirections
+              key={step}
               apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY ?? ""}
               origin={pickupLocation}
               destination={dropoffLocation}
