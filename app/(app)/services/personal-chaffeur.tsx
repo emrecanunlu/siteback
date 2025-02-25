@@ -208,7 +208,7 @@ export default function PersonalChaffeur() {
                 },
                 {
                   onSuccess: () => {
-                    router.back();
+                    router.replace("/(app)/(tabs)/trips");
                   },
                 }
               );

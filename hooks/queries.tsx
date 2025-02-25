@@ -1,6 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { loginOTP, loginVerification } from "~/services/auth-service";
-import { createTrip, getNearestChauffeur } from "~/services/trip-service";
+import {
+  createTrip,
+  getNearestChauffeur,
+  getTrips,
+} from "~/services/trip-service";
 import { updateAvatar, updateUser } from "~/services/user-service";
 import { createVehicle, getVehicles } from "~/services/vehicle-service";
 import { LoginOTPRequest, LoginVerificationRequest } from "~/types/Auth";
@@ -62,5 +66,12 @@ export const useCreateTrip = () => {
   return useMutation({
     mutationKey: ["createTrip"],
     mutationFn: (data: CreateTripDto) => createTrip(data),
+  });
+};
+
+export const useGetTrips = (status: number) => {
+  return useQuery({
+    queryKey: ["getTrips", status],
+    queryFn: () => getTrips(status),
   });
 };
