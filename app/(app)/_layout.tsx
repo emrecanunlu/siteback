@@ -32,7 +32,7 @@ export default function AppLayout() {
       <Stack.Screen
         name="vehicle"
         options={{
-          presentation: "modal",
+          headerShown: false,
           title: "Your Cars",
         }}
       />

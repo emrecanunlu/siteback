@@ -5,7 +5,7 @@ export enum Gender {
 
 export enum Currency {
   USD,
+  TRY,
   EUR,
   AED,
-  TRY,
 }

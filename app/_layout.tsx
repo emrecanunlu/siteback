@@ -6,7 +6,7 @@ import {
   Theme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { router, Slot, Stack, useSegments } from "expo-router";
+import { router, Slot, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
 import { Platform } from "react-native";

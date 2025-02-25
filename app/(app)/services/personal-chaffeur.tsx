@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
 import MapView, {
   Marker,
+  Polyline,
   PROVIDER_GOOGLE,
   Region,
   LatLng,
@@ -21,9 +22,11 @@ import MapViewDirections from "react-native-maps-directions";
 import AppLoader from "~/components/AppLoader";
 import { SelectedRegion } from "~/types/Map";
 import { Currency } from "~/types/Enum";
-import { Text } from "~/components/ui/text";
-import { Vehicle } from "~/types/Vehicle";
 import FindChauffeur from "~/components/map/FindChauffeur";
+import { NearestChauffeur } from "~/types/User";
+import ConfirmTripView from "~/components/map/ConfirmTripView";
+import { useCreateTrip } from "~/hooks/queries";
+import { getDistance } from "geolib";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function PersonalChaffeur() {
@@ -41,6 +44,7 @@ export default function PersonalChaffeur() {
   const [region, setRegion] = useState<Region | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [chauffeur, setChauffeur] = useState<NearestChauffeur | null>(null);
 
   const { location } = useLocation();
   const { bottom, top } = useSafeAreaInsets();
@@ -48,6 +52,7 @@ export default function PersonalChaffeur() {
   const mapViewRef = useRef<MapView>(null);
 
   const params = useLocalSearchParams<{ vehicleId?: string }>();
+  const mutation = useCreateTrip();
 
   const getCurrentLocationAddress = async (region: Region) => {
     const response = await fetch(
@@ -93,6 +98,10 @@ export default function PersonalChaffeur() {
       case 3:
         setStep(2);
         break;
+      case 4:
+        setChauffeur(null);
+        setStep(2);
+        break;
       default:
         break;
     }
@@ -126,17 +135,16 @@ export default function PersonalChaffeur() {
             onConfirm={async () => {
               if (!region || !address) return;
 
-              setIsLoading(true);
+              /* setIsLoading(true); */
               setPickupLocation({
                 latitude: region.latitude,
                 longitude: region.longitude,
                 address,
               });
 
-              // Kısa bir loading göster
-              await delay(500);
+              /* await delay(500); */
               setStep(2);
-              setIsLoading(false);
+              /* setIsLoading(false); */
             }}
           />
         );
@@ -165,7 +173,48 @@ export default function PersonalChaffeur() {
       case 3:
         if (!pickupLocation || !dropoffLocation) return null;
 
-        return <FindChauffeur />;
+        return (
+          <FindChauffeur
+            onConfirm={(chauffeur) => {
+              setChauffeur(chauffeur);
+              setStep(4);
+            }}
+            lat={pickupLocation.longitude}
+            lng={pickupLocation.latitude}
+          />
+        );
+      case 4:
+        if (!chauffeur) return null;
+
+        return (
+          <ConfirmTripView
+            chauffeur={chauffeur}
+            onConfirm={() => {
+              if (!pickupLocation || !dropoffLocation) return;
+
+              const distance =
+                getDistance(pickupLocation, dropoffLocation) / 1000;
+              const price = distance * 0.25;
+
+              mutation.mutate(
+                {
+                  pickupLocation: pickupLocation.address,
+                  dropoffLocation: dropoffLocation.address,
+                  payment: price,
+                  paymentType: selectedCurrency ?? Currency.USD,
+                  pickupLng: pickupLocation.longitude,
+                  pickupLat: pickupLocation.latitude,
+                  description: "",
+                },
+                {
+                  onSuccess: () => {
+                    router.back();
+                  },
+                }
+              );
+            }}
+          />
+        );
     }
   };
 
@@ -192,6 +241,18 @@ export default function PersonalChaffeur() {
       setVehicleId(parseInt(params.vehicleId));
     }
   }, [params.vehicleId]);
+
+  useEffect(() => {
+    if (step >= 2 && dropoffLocation && pickupLocation) {
+      const coordinates: LatLng[] = [dropoffLocation, pickupLocation];
+
+      setTimeout(() => {
+        mapViewRef.current?.fitToCoordinates(coordinates, {
+          edgePadding: { top: 100, bottom: 100, left: 100, right: 100 },
+        });
+      }, 1000);
+    }
+  }, [step, chauffeur, pickupLocation, dropoffLocation]);
 
   return (
     <View className="flex-1">
@@ -241,16 +302,11 @@ export default function PersonalChaffeur() {
             <MapViewDirections
               key={step}
               apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY ?? ""}
+              strokeWidth={3}
               origin={pickupLocation}
               destination={dropoffLocation}
-              strokeWidth={3}
               mode="DRIVING"
               optimizeWaypoints
-              onReady={(result) => {
-                mapViewRef.current?.fitToCoordinates(result.coordinates, {
-                  edgePadding: { top: 50, bottom: 50, left: 50, right: 50 },
-                });
-              }}
             />
           )}
         </MapView>
@@ -273,7 +329,7 @@ export default function PersonalChaffeur() {
       >
         <View className="p-6">{renderBottomView()}</View>
       </View>
-      <AppLoader loading={isLoading} />
+      <AppLoader loading={mutation.isPending} />
     </View>
   );
 }

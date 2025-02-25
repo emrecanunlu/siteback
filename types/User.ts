@@ -21,3 +21,11 @@ export type UpdateUserDto = {
   dateOfBirth?: string;
   gender: Gender;
 };
+
+export type NearestChauffeur = User & {
+  location: {
+    x: number;
+    y: number;
+  };
+  distance: number;
+};

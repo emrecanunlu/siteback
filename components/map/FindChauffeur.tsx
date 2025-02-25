@@ -3,9 +3,29 @@ import { Text } from "../ui/text";
 import { Loader } from "~/lib/icons/Loader";
 import { Images } from "~/config/assets";
 import { useColorScheme } from "~/lib/useColorScheme";
+import { useGetNearestChauffeur } from "~/hooks/queries";
+import { useEffect } from "react";
+import { NearestChauffeur } from "~/types/User";
+import { router } from "expo-router";
 
-export default function FindChauffeur() {
+type Props = {
+  lat: number;
+  lng: number;
+  onConfirm: (chauffeur: NearestChauffeur) => void;
+};
+
+export default function FindChauffeur({ lat, lng, onConfirm }: Props) {
   const { isDarkColorScheme } = useColorScheme();
+
+  const { data: result, isLoading, error } = useGetNearestChauffeur(lat, lng);
+
+  useEffect(() => {
+    if (error || !result) return;
+
+    setTimeout(() => {
+      onConfirm(result.data!);
+    }, 3000);
+  }, [result, error]);
 
   return (
     <View className="flex-col items-center justify-center gap-y-6">

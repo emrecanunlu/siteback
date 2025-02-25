@@ -36,11 +36,12 @@ export default function Vehicle() {
     <View className="flex-1 bg-secondary/50">
       <Header />
 
-      <View className="flex-1 p-4 justify-between">
+      <View className="flex-1 justify-between">
         <FlatList
           data={result?.data ?? []}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-y-3 flex-1"
+          contentContainerClassName="gap-y-3 px-4 py-6"
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <Pressable>
               <Card>
@@ -57,9 +58,11 @@ export default function Vehicle() {
           )}
         />
 
-        <Button onPress={() => bottomSheetRef.current?.present()}>
-          <Text>Add Car</Text>
-        </Button>
+        <View className="px-4 pb-4">
+          <Button onPress={() => bottomSheetRef.current?.present()}>
+            <Text>Add Car</Text>
+          </Button>
+        </View>
       </View>
 
       <VehicleCreateBottomSheet ref={bottomSheetRef} />
