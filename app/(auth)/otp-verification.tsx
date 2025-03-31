@@ -1,16 +1,14 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Pressable, View } from "react-native";
+import { Alert, Pressable, View } from "react-native";
 import { OtpInput } from "~/components/OtpInput";
 import { Text } from "~/components/ui/text";
 import { useEffect, useState } from "react";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginVerification } from "~/hooks/queries";
 import { useAuth } from "~/providers/auth-providers";
+import AppLoader from "~/components/AppLoader";
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -23,6 +21,7 @@ const formatTime = (time: number) => {
 export default function OtpVerification() {
   const [timeLeft, setTimeLeft] = useState(60);
 
+  const { loading } = useAuth();
   const { phoneNumber, code, isRegistered } = useLocalSearchParams<{
     phoneNumber: string;
     code: string;
@@ -33,28 +32,18 @@ export default function OtpVerification() {
   const mutation = useLoginVerification();
 
   const handleComplete = (otpCode: string) => {
-    if (otpCode !== code) {
-      return;
-    }
-
     if (isRegistered === "false") {
-      return router.replace({
-        pathname: "/sign-up",
-        params: {
-          code,
-          phoneNumber,
-        },
-      });
+      Alert.alert("Register Form", "Burası Daha Eklenmedi");
+      return;
     }
 
     mutation.mutate(
       {
         phone: phoneNumber,
-        loginCode: parseInt(otpCode),
+        loginCode: otpCode,
         rememberMe: true,
       },
       {
-        onError: (error) => {},
         onSuccess: (response) => {
           signIn(response.data!.accessToken, response.data!.refreshToken);
         },
@@ -104,10 +93,10 @@ export default function OtpVerification() {
           </Text>
         </Text>
 
-        <Text>{code}</Text>
-
         <StatusBar style="dark" />
       </View>
+
+      <AppLoader loading={mutation.isPending || loading} />
     </SafeAreaView>
   );
 }

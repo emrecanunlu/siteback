@@ -6,6 +6,8 @@ export default function ServicesLayout() {
       screenOptions={{
         headerShown: false,
       }}
-    />
+    >
+      <Stack.Screen name="personal-chaffeur" />
+    </Stack>
   );
 }

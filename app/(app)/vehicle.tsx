@@ -45,7 +45,8 @@ export default function Vehicle() {
         <FlatList
           data={result?.data ?? []}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerClassName="gap-y-3 flex-1"
+          contentContainerClassName="gap-y-3"
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => {
@@ -69,7 +70,10 @@ export default function Vehicle() {
           )}
         />
 
-        <Button onPress={() => bottomSheetRef.current?.present()}>
+        <Button
+          onPress={() => bottomSheetRef.current?.present()}
+          className="mt-3"
+        >
           <Text>Add Car</Text>
         </Button>
       </View>

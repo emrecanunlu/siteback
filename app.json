@@ -2,7 +2,7 @@
   "expo": {
     "name": "siteback",
     "slug": "siteback",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -13,9 +13,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.emreunlu0.siteback",
@@ -58,6 +56,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
+      ],
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
       ]
     ],
     "experiments": {
@@ -67,8 +71,26 @@
       "router": {
         "origin": false
       },
+      "oneSignalAppId": "a87d28d8-f5ad-4703-9cfb-749efa858666",
       "eas": {
-        "projectId": "20567353-c192-4f14-a42a-259df8fbe74c"
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.emreunlu0.siteback.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.emreunlu0.siteback.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "ed257a50-1e3b-44e8-b462-f2303407dae6"
       }
     }
   }

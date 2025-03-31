@@ -18,6 +18,8 @@ import { useCallback, useState } from "react";
 import { ChevronDown } from "~/lib/icons/ChevronDown";
 import { router } from "expo-router";
 import { useLoginOTP } from "~/hooks/queries";
+import AppLoader from "~/components/AppLoader";
+import { OneSignal } from "react-native-onesignal";
 
 export default function Welcome() {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -38,23 +40,15 @@ export default function Welcome() {
     setIsOpen(false);
   }, []);
 
-  const handleSubmit = () => {
-    if (phoneNumber.trim().length < 10) {
-      return;
-    }
-
+  const handleSubmit = async () => {
     mutation.mutate(
       { phone: getSelectedCountry()?.dial_code + phoneNumber },
       {
-        onError: (error) => {
-          console.log(error.message);
-        },
         onSuccess: (response) => {
           router.push({
             pathname: "/otp-verification",
             params: {
               phoneNumber: getSelectedCountry()?.dial_code + phoneNumber,
-              code: response.data?.code,
               isRegistered: response.data?.isRegistered?.toString() || "false",
             },
           });
@@ -165,6 +159,8 @@ export default function Welcome() {
           )}
         </View>
       </KeyboardAvoidingView>
+
+      <AppLoader loading={mutation.isPending} />
 
       <StatusBar style="light" />
     </View>

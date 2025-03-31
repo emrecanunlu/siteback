@@ -15,8 +15,6 @@ export default function ConfirmTripView({ chauffeur, onConfirm }: Props) {
   const getAvatarUri = (uri: string) => {
     const url = uri.includes("http") ? uri : `${serverUrl}/${uri}`;
 
-    console.log(url);
-
     return url;
   };
 

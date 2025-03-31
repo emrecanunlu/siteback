@@ -3,16 +3,15 @@ import { Button } from "./ui/button";
 import { User } from "~/lib/icons/User";
 import { Edit } from "~/lib/icons/Edit";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 
 import { useState } from "react";
 
 type Props = {
   imageUri: string | null;
-  onSelectImage: (image: ImagePicker.ImagePickerAsset) => void;
+  onSelectImage: (file: { uri: string; type: string; name: string }) => void;
 };
 
-export const SelectAvatar = ({ imageUri, onSelectImage }: Props) => {
+export const SelectAvatar = ({ imageUri }: Props) => {
   const [image, setImage] = useState<string | null>(imageUri);
 
   const pickImage = async () => {
@@ -23,12 +22,11 @@ export const SelectAvatar = ({ imageUri, onSelectImage }: Props) => {
       quality: 1,
     });
 
-    if (!result.canceled && result.assets.length > 0) {
-      const fileUri = result.assets[0].uri;
-
-      setImage(fileUri);
-      onSelectImage(result.assets[0]);
+    if (result.canceled || result.assets.length === 0) {
+      return;
     }
+
+    const asset = result.assets[0];
   };
 
   return (

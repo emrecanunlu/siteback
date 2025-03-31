@@ -5,7 +5,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { DatepickerInput } from "~/components/DatepickerInput";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -20,6 +20,7 @@ import { useAuth } from "~/providers/auth-providers";
 import { useUpdateAvatar, useUpdateUser } from "~/hooks/queries";
 import * as ImagePicker from "expo-image-picker";
 import AppLoader from "~/components/AppLoader";
+import httpClient from "~/lib/axios";
 const schema = yup.object({
   firstName: yup.string().required(),
   lastName: yup.string().required(),
@@ -32,12 +33,18 @@ const schema = yup.object({
 });
 
 export default function Profile() {
+  const [selectedImage, setSelectedImage] = useState<{
+    uri: string;
+    type: string;
+    name: string;
+  } | null>(null);
   const inputRefs = useRef<TextInput[]>([]);
 
-  const { user, updateUser, loading } = useAuth();
+  const { signOut } = useAuth();
+
+  const { user } = useAuth();
   const { bottom } = useSafeAreaInsets();
   const mutation = useUpdateUser();
-  const updateAvatarMutation = useUpdateAvatar();
 
   const {
     control,
@@ -55,32 +62,13 @@ export default function Profile() {
     },
   });
 
-  const onSubmit = handleSubmit((values) => {
-    mutation.mutate(
-      {
-        firstname: values.firstName,
-        lastname: values.lastName,
-        email: values.email,
-        dateOfBirth: values.dateOfBirth?.toISOString() ?? undefined,
-        gender: values.gender,
-      },
-      {
-        onSuccess: (response) => {
-          updateUser(response.data!.tokenResponse.accessToken);
-        },
-      }
-    );
-  });
-
-  const handleUploadAvatar = (image: ImagePicker.ImagePickerAsset) => {
-    console.log(image);
-  };
+  const onSubmit = handleSubmit(async (values) => {});
 
   return (
     <KeyboardAvoidingView behavior={"height"} className="flex-1">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="py-6 px-4 gap-y-8 flex-1">
-          <SelectAvatar imageUri={null} onSelectImage={handleUploadAvatar} />
+          <SelectAvatar imageUri={null} onSelectImage={setSelectedImage} />
 
           <Controller
             control={control}
@@ -221,6 +209,15 @@ export default function Profile() {
               </View>
             )}
           />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="self-start"
+            onPress={() => signOut()}
+          >
+            <Text>Logout</Text>
+          </Button>
         </View>
       </ScrollView>
 
@@ -235,8 +232,6 @@ export default function Profile() {
           <Text>Save</Text>
         </Button>
       </View>
-
-      <AppLoader loading={mutation.isPending || loading} />
     </KeyboardAvoidingView>
   );
 }

@@ -9,18 +9,25 @@ import {
 import { router, Slot, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as React from "react";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { PortalHost } from "@rn-primitives/portal";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "~/providers/auth-providers";
 import * as SplashScreen from "expo-splash-screen";
-import AppLoader from "~/components/AppLoader";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import Constants from "expo-constants";
+import { LogLevel, OneSignal } from "react-native-onesignal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
@@ -37,11 +44,31 @@ export {
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  }),
+  queryCache: new QueryCache({
+    onError: (error) => {
+      Alert.alert("Error", error.message);
+    },
+  }),
+});
 
 const InitialLayout = () => {
+  const hasMounted = React.useRef<boolean>(false);
   const { user, loading } = useAuth();
   const segments = useSegments();
+
+  const initOneSignal = () => {
+    OneSignal.Debug.setLogLevel(LogLevel.Verbose);
+    OneSignal.initialize(Constants.expoConfig?.extra?.oneSignalAppId);
+
+    // Also need enable notifications to complete OneSignal setup
+    OneSignal.Notifications.requestPermission(true);
+  };
 
   // İlk yükleme için useEffect
   React.useEffect(() => {
@@ -51,8 +78,6 @@ const InitialLayout = () => {
 
     SplashScreen.hideAsync();
 
-    console.log("hide");
-
     const inAuthGroup = segments[0] === "(auth)";
 
     if (inAuthGroup && user) {
@@ -60,7 +85,15 @@ const InitialLayout = () => {
     } else if (!inAuthGroup && !user) {
       router.replace("/welcome");
     }
+
+    hasMounted.current = true;
   }, [loading, user]);
+
+  React.useEffect(() => {
+    if (hasMounted.current) {
+      initOneSignal();
+    }
+  }, [hasMounted.current]);
 
   return <Slot />;
 };

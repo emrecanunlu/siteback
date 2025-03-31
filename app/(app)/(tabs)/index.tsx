@@ -1,20 +1,11 @@
-import { Redirect, router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { Image, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ServiceCard from "~/components/ServiceCard";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 
 import { Text } from "~/components/ui/text";
 import { Icons, Images } from "~/config/assets";
-import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { User } from "~/lib/icons/User";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { useAuth } from "~/providers/auth-providers";

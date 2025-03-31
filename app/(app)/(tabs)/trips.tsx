@@ -66,6 +66,8 @@ export default function Trips() {
             data={result?.data ?? []}
             contentContainerClassName="gap-y-2 py-6"
             alwaysBounceVertical={false}
+            bounces={false}
+            showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center">
                 <Text className="text-muted-foreground font-medium text-lg">

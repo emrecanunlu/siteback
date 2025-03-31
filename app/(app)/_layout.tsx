@@ -16,12 +16,14 @@ export default function AppLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
       <Stack.Screen
         name="services"
         options={{
           headerShown: false,
         }}
       />
+
       <Stack.Screen
         name="profile"
         options={{

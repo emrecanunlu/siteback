@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
+import { Text } from "~/components/ui/text";
 import MapView, {
   Marker,
   Polyline,
@@ -27,6 +28,9 @@ import { NearestChauffeur } from "~/types/User";
 import ConfirmTripView from "~/components/map/ConfirmTripView";
 import { useCreateTrip } from "~/hooks/queries";
 import { getDistance } from "geolib";
+import SearchLocation from "~/components/SearchLocation";
+import { Search } from "~/lib/icons/Search";
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function PersonalChaffeur() {
@@ -43,7 +47,6 @@ export default function PersonalChaffeur() {
   const [step, setStep] = useState<number>(0);
   const [region, setRegion] = useState<Region | null>(null);
   const [address, setAddress] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [chauffeur, setChauffeur] = useState<NearestChauffeur | null>(null);
 
   const { location } = useLocation();
@@ -51,8 +54,14 @@ export default function PersonalChaffeur() {
 
   const mapViewRef = useRef<MapView>(null);
 
-  const params = useLocalSearchParams<{ vehicleId?: string }>();
+  const params = useLocalSearchParams<{
+    vehicleId?: string;
+    lng?: string;
+    lat?: string;
+  }>();
   const mutation = useCreateTrip();
+
+  console.log("params", params);
 
   const getCurrentLocationAddress = async (region: Region) => {
     const response = await fetch(
@@ -254,9 +263,21 @@ export default function PersonalChaffeur() {
     }
   }, [step, chauffeur, pickupLocation, dropoffLocation]);
 
+  useEffect(() => {
+    if (params.lat && params.lng) {
+      zoomLocation({
+        latitude: parseFloat(params.lat),
+        longitude: parseFloat(params.lng),
+      });
+    }
+  }, [params.lat, params.lng]);
+
   return (
     <View className="flex-1">
-      <View className="absolute z-10 w-full px-6" style={{ marginTop: top }}>
+      <View
+        className="absolute z-10 w-full px-6 flex-row items-center gap-x-4"
+        style={{ marginTop: top }}
+      >
         <Button
           size="icon"
           variant="outline"
@@ -264,6 +285,24 @@ export default function PersonalChaffeur() {
           onPress={handleBackPress}
         >
           <ChevronLeft className="text-primary" size={24} />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className="flex-1 items-center justify-start flex-row px-4 gap-x-3 h-12"
+          onPress={() =>
+            router.push({
+              pathname: "/search-location",
+              params: {
+                latitude: region?.latitude,
+                longitude: region?.longitude,
+              },
+            })
+          }
+        >
+          <Search className="text-muted-foreground" size={20} />
+          <Text className="text-sm text-muted-foreground">Search Location</Text>
         </Button>
       </View>
 

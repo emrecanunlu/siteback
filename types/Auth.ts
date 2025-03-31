@@ -3,12 +3,11 @@ export type LoginOTPRequest = {
 };
 
 export type LoginOTPResponse = {
-  code: string;
   isRegistered: boolean;
 };
 
 export type LoginVerificationRequest = {
-  loginCode: number;
+  loginCode: string;
   email?: string;
   phone: string;
   firstname?: string;

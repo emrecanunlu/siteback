@@ -1,9 +1,6 @@
 import { useRef } from "react";
 import { Pressable, TextInput, View } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Text } from "~/components/ui/text";
@@ -15,6 +12,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
 import { useLoginVerification } from "~/hooks/queries";
 import { useAuth } from "~/providers/auth-providers";
+import AppLoader from "~/components/AppLoader";
 
 const schema = yup.object({
   firstName: yup.string().required(),
@@ -25,12 +23,12 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 export default function SignUp() {
+  const { loading, signIn } = useAuth();
+
   const { phoneNumber, code } = useLocalSearchParams<{
     phoneNumber: string;
     code: string;
   }>();
-
-  const { signIn } = useAuth();
 
   const lastNameRef = useRef<TextInput | null>(null);
   const emailRef = useRef<TextInput | null>(null);
@@ -175,6 +173,8 @@ export default function SignUp() {
       </View>
 
       <StatusBar style="dark" />
+
+      <AppLoader loading={mutation.isPending || loading} />
     </SafeAreaView>
   );
 }
