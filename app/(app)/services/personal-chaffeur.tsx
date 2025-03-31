@@ -287,23 +287,19 @@ export default function PersonalChaffeur() {
           <ChevronLeft className="text-primary" size={24} />
         </Button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="flex-1 items-center justify-start flex-row px-4 gap-x-3 h-12"
-          onPress={() =>
-            router.push({
-              pathname: "/search-location",
-              params: {
-                latitude: region?.latitude,
-                longitude: region?.longitude,
-              },
-            })
-          }
-        >
-          <Search className="text-muted-foreground" size={20} />
-          <Text className="text-sm text-muted-foreground">Search Location</Text>
-        </Button>
+        {step < 2 && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="flex-1 items-center justify-start flex-row px-4 gap-x-3 h-12"
+            onPress={() => router.push("/search-location")}
+          >
+            <Search className="text-muted-foreground" size={20} />
+            <Text className="text-sm text-muted-foreground">
+              Search Location
+            </Text>
+          </Button>
+        )}
       </View>
 
       <View className="flex-1 relative">
@@ -353,7 +349,7 @@ export default function PersonalChaffeur() {
         {step < 2 && (
           <Image
             source={Icons.Pin}
-            className="w-16 h-16 -mt-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+            className="w-16 h-16 -mt-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
             resizeMode="contain"
           />
         )}

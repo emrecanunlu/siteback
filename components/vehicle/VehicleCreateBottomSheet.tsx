@@ -1,4 +1,10 @@
-import { View, TextInput } from "react-native";
+import {
+  View,
+  TextInput,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { Text } from "../ui/text";
 import {
   BottomSheetBackdrop,
@@ -16,6 +22,8 @@ import yup from "~/lib/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useCreateVehicle } from "~/hooks/queries";
 import { useQueryClient } from "@tanstack/react-query";
+import { vehicleTypes } from "~/utils/data";
+import { cn } from "~/lib/utils";
 
 type Props = {};
 
@@ -25,14 +33,16 @@ type FormData = {
   plateNumber: string;
   transmissionType: "automatic" | "manual";
   comprehensiveInsurance: boolean;
+  iconName: string;
 };
 
 const schema = yup.object({
-  brand: yup.string().required(""),
-  model: yup.string().required(""),
-  plateNumber: yup.string().required(""),
-  transmissionType: yup.string().oneOf(["automatic", "manual"]).required(""),
-  comprehensiveInsurance: yup.boolean().required(""),
+  brand: yup.string().required(),
+  model: yup.string().required(),
+  plateNumber: yup.string().required(),
+  transmissionType: yup.string().oneOf(["automatic", "manual"]).required(),
+  comprehensiveInsurance: yup.boolean().required(),
+  iconName: yup.string().required(),
 });
 
 const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
@@ -55,6 +65,7 @@ const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
         plateNumber: "",
         transmissionType: "automatic",
         comprehensiveInsurance: false,
+        iconName: "Sedan",
       },
     });
 
@@ -206,6 +217,41 @@ const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
                       {error.message}
                     </Text>
                   )}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="iconName"
+              render={({ field: { onChange, value } }) => (
+                <View>
+                  <Label className="ml-2">Vehicle Type</Label>
+                  <ScrollView
+                    horizontal
+                    className="mt-2 ml-2"
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerClassName="gap-x-2"
+                  >
+                    {vehicleTypes.map((vehicle) => (
+                      <Button
+                        key={vehicle.name}
+                        onPress={() => onChange(vehicle.name)}
+                        variant={"outline"}
+                        className={cn(
+                          "flex-row items-center gap-x-2",
+                          value === vehicle.name && "border-primary"
+                        )}
+                      >
+                        <Image
+                          source={vehicle.icon}
+                          className="w-12 h-12"
+                          resizeMode="contain"
+                        />
+                        <Text>{vehicle.name}</Text>
+                      </Button>
+                    ))}
+                  </ScrollView>
                 </View>
               )}
             />
