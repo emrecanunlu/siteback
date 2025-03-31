@@ -4,6 +4,7 @@ export type CreateVehicleDto = {
   plateNumber: string;
   isManual: boolean;
   hasInsurance: boolean;
+  iconName: string;
 };
 
 export type Vehicle = {
@@ -13,4 +14,5 @@ export type Vehicle = {
   plateNumber: string;
   isManual: boolean;
   hasInsurance: boolean;
+  iconName: string;
 };

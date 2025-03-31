@@ -20,6 +20,7 @@ import { Text } from "~/components/ui/text";
 import VehicleCreateBottomSheet from "~/components/vehicle/VehicleCreateBottomSheet";
 import { Icons } from "~/config/assets";
 import { useGetVehicles } from "~/hooks/queries";
+import { vehicleTypes } from "~/utils/data";
 
 const Header = () => {
   const { top } = useSafeAreaInsets();
@@ -38,6 +39,12 @@ export default function Vehicle() {
 
   const { data: result, isLoading } = useGetVehicles();
 
+  const getVehicleIcon = (iconName: string) => {
+    const icon = vehicleTypes.find((vehicle) => vehicle.name === iconName);
+
+    return icon?.icon ?? Icons.Vehicle.Sedan;
+  };
+
   return (
     <View className="flex-1 bg-secondary/50">
       <Header />
@@ -52,9 +59,7 @@ export default function Vehicle() {
             data={result?.data ?? []}
             keyExtractor={(item) => item.id.toString()}
             contentContainerClassName="gap-y-3"
-            alwaysBounceVertical={false}
             showsVerticalScrollIndicator={false}
-            bounces={false}
             ListEmptyComponent={
               <View className="flex-1 items-center justify-center">
                 <Text>No cars found</Text>
@@ -69,7 +74,10 @@ export default function Vehicle() {
                       <CardDescription>{item.plateNumber}</CardDescription>
                     </View>
 
-                    <Image source={Icons.SedanCar} className="w-14 h-14" />
+                    <Image
+                      source={getVehicleIcon(item.iconName)}
+                      className="w-14 h-14"
+                    />
                   </CardHeader>
                 </Card>
               </Pressable>

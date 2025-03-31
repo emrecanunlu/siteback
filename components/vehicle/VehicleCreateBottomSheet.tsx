@@ -91,14 +91,12 @@ const VehicleCreateBottomSheet = forwardRef<BottomSheetModal, Props>(
           plateNumber: data.plateNumber,
           isManual: data.transmissionType === "manual",
           hasInsurance: data.comprehensiveInsurance,
+          iconName: data.iconName,
         },
         {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["getVehicles"] });
             bottomSheetRef.current?.dismiss();
-          },
-          onError: (error) => {
-            console.log(error);
           },
         }
       );

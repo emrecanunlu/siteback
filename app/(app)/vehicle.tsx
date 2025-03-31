@@ -15,6 +15,7 @@ import VehicleCreateBottomSheet from "~/components/vehicle/VehicleCreateBottomSh
 import { Icons } from "~/config/assets";
 import { useGetVehicles } from "~/hooks/queries";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
+import { vehicleTypes } from "~/utils/data";
 
 const Header = () => {
   const { top } = useSafeAreaInsets();
@@ -36,6 +37,12 @@ export default function Vehicle() {
 
   const { bottom } = useSafeAreaInsets();
   const { data: result } = useGetVehicles();
+
+  const getVehicleIcon = (iconName: string) => {
+    const icon = vehicleTypes.find((vehicle) => vehicle.name === iconName);
+
+    return icon?.icon ?? Icons.Vehicle.Sedan;
+  };
 
   return (
     <View className="flex-1 bg-secondary/50" style={{ paddingBottom: bottom }}>
@@ -63,7 +70,10 @@ export default function Vehicle() {
                     <CardDescription>{item.model}</CardDescription>
                   </View>
 
-                  <Image source={Icons.SedanCar} className="w-14 h-14" />
+                  <Image
+                    source={getVehicleIcon(item.iconName)}
+                    className="w-14 h-14"
+                  />
                 </CardHeader>
               </Card>
             </Pressable>
