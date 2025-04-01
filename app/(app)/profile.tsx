@@ -3,7 +3,6 @@ import {
   TextInput,
   KeyboardAvoidingView,
   ScrollView,
-  Platform,
 } from "react-native";
 import { useRef, useState } from "react";
 import { DatepickerInput } from "~/components/DatepickerInput";
@@ -17,10 +16,8 @@ import yup from "~/lib/yup";
 import { Gender } from "~/types/Enum";
 import { SelectAvatar } from "~/components/SelectAvatar";
 import { useAuth } from "~/providers/auth-providers";
-import { useUpdateAvatar, useUpdateUser } from "~/hooks/queries";
-import * as ImagePicker from "expo-image-picker";
-import AppLoader from "~/components/AppLoader";
-import httpClient from "~/lib/axios";
+import { useUpdateUser } from "~/hooks/queries";
+
 const schema = yup.object({
   firstName: yup.string().required(),
   lastName: yup.string().required(),
@@ -33,16 +30,12 @@ const schema = yup.object({
 });
 
 export default function Profile() {
-  const [selectedImage, setSelectedImage] = useState<{
-    uri: string;
-    type: string;
-    name: string;
-  } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
   const inputRefs = useRef<TextInput[]>([]);
 
   const { signOut } = useAuth();
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { bottom } = useSafeAreaInsets();
   const mutation = useUpdateUser();
 
@@ -62,13 +55,30 @@ export default function Profile() {
     },
   });
 
-  const onSubmit = handleSubmit(async (values) => {});
+  const onSubmit = handleSubmit(async (values) => {
+    mutation.mutate(
+      {
+        firstname: values.firstName,
+        lastname: values.lastName,
+        email: values.email,
+        dateOfBirth: values.dateOfBirth?.toISOString(),
+        gender: values.gender,
+      },
+      {
+        onSuccess: (response) => {
+          if (response.data) {
+            updateUser(response.data.tokenResponse, response.data.user);
+          }
+        },
+      }
+    );
+  });
 
   return (
     <KeyboardAvoidingView behavior={"height"} className="flex-1">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="py-6 px-4 gap-y-8 flex-1">
-          <SelectAvatar imageUri={null} onSelectImage={setSelectedImage} />
+          <SelectAvatar />
 
           <Controller
             control={control}

@@ -26,7 +26,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import Constants from "expo-constants";
 import { LogLevel, OneSignal } from "react-native-onesignal";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,

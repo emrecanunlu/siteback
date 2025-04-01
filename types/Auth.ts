@@ -21,3 +21,8 @@ export type LoginTokenResponse = {
   refreshToken: string;
   refreshExpiration: string;
 };
+
+export type RefreshTokenRequest = Pick<
+  LoginTokenResponse,
+  "accessToken" | "refreshToken"
+>;

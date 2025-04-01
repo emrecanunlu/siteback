@@ -10,18 +10,15 @@ export const getUser = async () => {
 
 export const updateUser = async (data: UpdateUserDto) => {
   const response = await axios.post<
-    ApiResult<{ tokenResponse: LoginTokenResponse }>
+    ApiResult<{
+      tokenResponse: LoginTokenResponse;
+      user: User;
+    }>
   >("/User/Update", data);
   return response.data;
 };
 
 export const updateAvatar = async (formData: FormData) => {
-  const response = await axios.post<
-    ApiResult<{ tokenResponse: LoginTokenResponse }>
-  >("/User/UpdateAvatar", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await axios.post<ApiResult>("/User/UpdateAvatar", formData);
   return response.data;
 };

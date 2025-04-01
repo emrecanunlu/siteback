@@ -3,17 +3,25 @@ import { Image, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ServiceCard from "~/components/ServiceCard";
 import { Button } from "~/components/ui/button";
-
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Text } from "~/components/ui/text";
 import { Icons, Images } from "~/config/assets";
-import { User } from "~/lib/icons/User";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { useAuth } from "~/providers/auth-providers";
+import { User } from "~/lib/icons/User";
 
 export default function Home() {
   const { user } = useAuth();
   const { top } = useSafeAreaInsets();
   const { isDarkColorScheme } = useColorScheme();
+
+  const getUserAvatar = () => {
+    if (user?.avatarUrl) {
+      return `${process.env.EXPO_PUBLIC_SERVER_URL}/${user.avatarUrl}`;
+    }
+
+    return undefined;
+  };
 
   return (
     <View className="flex-1">
@@ -28,7 +36,12 @@ export default function Home() {
             className="rounded-full w-12 h-12 border border-border"
             onPress={() => router.push("/profile")}
           >
-            <User size={24} className="color-primary" />
+            <Avatar alt="Avatar" className="w-12 h-12">
+              <AvatarImage source={{ uri: getUserAvatar() }} />
+              <AvatarFallback>
+                <User size={24} className="text-primary" />
+              </AvatarFallback>
+            </Avatar>
           </Button>
 
           <Text className="text-lg font-medium">Hi, {user?.firstname}</Text>

@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "siteback",
+    "name": "Sitback",
     "slug": "siteback",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash.png",
@@ -16,6 +16,10 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
+      "icon": {
+        "light": "./assets/images/Light.png",
+        "dark": "./assets/images/Dark.png"
+      },
       "bundleIdentifier": "com.emreunlu0.siteback",
       "config": {
         "googleMapsApiKey": "AIzaSyAkwcsDH-GhJTxf6QypdTjqFwWFHFKR9LI"
@@ -61,6 +65,18 @@
         "onesignal-expo-plugin",
         {
           "mode": "development"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash-icon-dark.png",
+          "dark": {
+            "image": "./assets/images/splash-icon-light.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200
         }
       ]
     ],
