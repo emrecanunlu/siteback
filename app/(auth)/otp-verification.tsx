@@ -33,7 +33,13 @@ export default function OtpVerification() {
 
   const handleComplete = (otpCode: string) => {
     if (isRegistered === "false") {
-      Alert.alert("Register Form", "Burası Daha Eklenmedi");
+      router.replace({
+        pathname: "/sign-up",
+        params: {
+          phoneNumber,
+          code,
+        },
+      });
       return;
     }
 

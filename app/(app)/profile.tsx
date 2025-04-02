@@ -55,7 +55,7 @@ export default function Profile() {
     },
   });
 
-  const onSubmit = handleSubmit(async (values) => {
+  const onSubmit = handleSubmit((values) => {
     mutation.mutate(
       {
         firstname: values.firstName,
@@ -66,9 +66,7 @@ export default function Profile() {
       },
       {
         onSuccess: (response) => {
-          if (response.data) {
-            updateUser(response.data.tokenResponse, response.data.user);
-          }
+          updateUser(response.data!.tokenResponse, response.data!.user);
         },
       }
     );

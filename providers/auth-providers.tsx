@@ -48,10 +48,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateUser = async (tokenResponse: LoginTokenResponse, user: User) => {
     await AsyncStorage.setItem("accessToken", tokenResponse.accessToken);
-    await AsyncStorage.setItem("refreshToken", tokenResponse.refreshToken);
 
-    console.log("user", user);
-    setUser(user);
+    getUserCredentials();
   };
 
   const refreshToken = async () => {
@@ -63,9 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     getRefreshToken({ accessToken, refreshToken })
       .then(async (response) => {
         if (response.data) {
-          console.log("tokenResponse", response.data.tokenResponse);
-          console.log("user", response.data.user);
-
           await AsyncStorage.setItem(
             "accessToken",
             response.data.tokenResponse.accessToken
@@ -75,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             response.data.tokenResponse.refreshToken
           );
 
-          setUser(response.data.user);
+          getUserCredentials();
         }
       })
       .catch((error) => {

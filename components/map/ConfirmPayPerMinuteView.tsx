@@ -4,7 +4,7 @@ import { SelectedRegion } from "~/types/Map";
 import { Currency } from "~/types/Enum";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { currencies } from "~/utils/data";
+import { currencies, vehicleTypes } from "~/utils/data";
 import { Button } from "../ui/button";
 import RouteConfirmBottomSheet from "./RouteConfirmBottomSheet";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -13,6 +13,8 @@ import { router } from "expo-router";
 import { Icons } from "~/config/assets";
 import { ChevronRight } from "~/lib/icons/ChevronRight";
 import { useGetVehicles } from "~/hooks/queries";
+import { Vehicle } from "~/types/Vehicle";
+
 type Props = {
   pickupLocation: SelectedRegion;
   dropoffLocation: SelectedRegion;
@@ -54,6 +56,12 @@ export default function ConfirmPayPerMinuteView({
   const selectedVehicle = useMemo(() => {
     return result?.data?.find((v) => v.id === vehicleId);
   }, [result, vehicleId]);
+
+  const getVehicleIcon = (name: string) => {
+    return (
+      vehicleTypes.find((v) => v.name === name)?.icon ?? Icons.Vehicle.Sedan
+    );
+  };
 
   return (
     <View>
@@ -106,7 +114,10 @@ export default function ConfirmPayPerMinuteView({
           onPress={() => router.push("/vehicle")}
         >
           <View className="flex-row items-center gap-x-4">
-            <Image source={Icons.SedanCar} className="w-12 h-12 rounded-lg" />
+            <Image
+              source={getVehicleIcon(selectedVehicle?.iconName ?? "")}
+              className="w-12 h-12 rounded-lg"
+            />
 
             <View className="flex-1">
               <Text className="font-medium">

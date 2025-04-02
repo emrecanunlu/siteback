@@ -56,7 +56,7 @@ export default function SignUp() {
         lastname: data.lastName,
         email: data.email,
         phone: phoneNumber,
-        loginCode: parseInt(code),
+        loginCode: code,
         rememberMe: true,
       },
       {
