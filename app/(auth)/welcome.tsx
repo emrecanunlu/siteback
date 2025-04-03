@@ -41,6 +41,8 @@ export default function Welcome() {
   }, []);
 
   const handleSubmit = async () => {
+    if (phoneNumber.length === 0) return;
+
     mutation.mutate(
       { phone: getSelectedCountry()?.dial_code + phoneNumber },
       {
@@ -122,7 +124,6 @@ export default function Welcome() {
                   value={phoneNumber}
                   onChangeText={setPhoneNumber}
                   onEndEditing={handleSubmit}
-                  onSubmitEditing={handleSubmit}
                 />
               </View>
             </View>

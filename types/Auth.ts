@@ -26,3 +26,8 @@ export type RefreshTokenRequest = Pick<
   LoginTokenResponse,
   "accessToken" | "refreshToken"
 >;
+export type OtpVerifyRequest = {
+  phone: string;
+  loginCode: string;
+  rememberMe: boolean;
+};

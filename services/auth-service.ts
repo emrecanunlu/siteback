@@ -4,6 +4,7 @@ import type {
   LoginOTPResponse,
   LoginTokenResponse,
   LoginVerificationRequest,
+  OtpVerifyRequest,
   RefreshTokenRequest,
 } from "~/types/Auth";
 import { ApiResult } from "~/types/Network";
@@ -32,5 +33,13 @@ export const refreshToken = async (data: RefreshTokenRequest) => {
       user: User;
     }>
   >("/Auth/RefreshToken", data);
+  return response.data;
+};
+
+export const otpVerify = async (data: OtpVerifyRequest) => {
+  const response = await httpClient.post<ApiResult<LoginTokenResponse>>(
+    "/Auth/OtpVerify",
+    data
+  );
   return response.data;
 };

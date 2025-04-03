@@ -5,18 +5,19 @@ import {
   ScrollView,
 } from "react-native";
 import { useRef, useState } from "react";
-import { DatepickerInput } from "~/components/DatepickerInput";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Text } from "~/components/ui/text";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import yup from "~/lib/yup";
 import { Gender } from "~/types/Enum";
 import { SelectAvatar } from "~/components/SelectAvatar";
 import { useAuth } from "~/providers/auth-providers";
-import { useUpdateUser } from "~/hooks/queries";
+import { useUpdateUser, useVerifyEmail } from "~/hooks/queries";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { MailVerifyBottomSheet } from "~/components/MailVerifyBottomSheet";
+import yup from "~/lib/yup";
 
 const schema = yup.object({
   firstName: yup.string().required(),
@@ -30,18 +31,19 @@ const schema = yup.object({
 });
 
 export default function Profile() {
-  const [selectedImage, setSelectedImage] = useState<any>(null);
-  const inputRefs = useRef<TextInput[]>([]);
-
-  const { signOut } = useAuth();
-
   const { user, updateUser } = useAuth();
+  const { signOut } = useAuth();
   const { bottom } = useSafeAreaInsets();
-  const mutation = useUpdateUser();
+  const { mutate: updateUserMutation, isPending: isUpdatingUser } =
+    useUpdateUser();
+  const { mutate: verifyEmail, isPending: isVerifyingEmail } = useVerifyEmail();
+
+  const inputRefs = useRef<TextInput[]>([]);
+  const mailVerifyBottomSheetRef = useRef<BottomSheetModal>(null);
 
   const {
     control,
-    formState: { errors, isValid, isSubmitted },
+    formState: { errors },
     handleSubmit,
   } = useForm({
     shouldFocusError: false,
@@ -50,18 +52,16 @@ export default function Profile() {
       email: user?.email,
       firstName: user?.firstname,
       lastName: user?.lastname,
-      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth) : undefined,
       gender: Gender.Male,
     },
   });
 
   const onSubmit = handleSubmit((values) => {
-    mutation.mutate(
+    updateUserMutation(
       {
         firstname: values.firstName,
         lastname: values.lastName,
         email: values.email,
-        dateOfBirth: values.dateOfBirth?.toISOString(),
         gender: values.gender,
       },
       {
@@ -72,9 +72,17 @@ export default function Profile() {
     );
   });
 
+  const handleVerifyEmail = () => {
+    mailVerifyBottomSheetRef.current?.present();
+  };
+
   return (
     <KeyboardAvoidingView behavior={"height"} className="flex-1">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
         <View className="py-6 px-4 gap-y-8 flex-1">
           <SelectAvatar />
 
@@ -153,34 +161,39 @@ export default function Profile() {
                 <Text className="text-sm text-muted-foreground font-medium ml-2">
                   Email
                 </Text>
-                <Input
-                  className="border-0 border-b border-border"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Email"
-                  returnKeyType="done"
-                  ref={(r) => {
-                    ref(r);
-                    if (r) {
-                      inputRefs.current.push(r);
-                    }
-                  }}
-                />
+                <View className="relative">
+                  <Input
+                    className="border-0 border-b border-border"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    placeholder="Email"
+                    returnKeyType="done"
+                    ref={(r) => {
+                      ref(r);
+                      if (r) {
+                        inputRefs.current.push(r);
+                      }
+                    }}
+                  />
+
+                  {!user?.isMailVerified && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0"
+                      onPress={handleVerifyEmail}
+                    >
+                      <Text>Verify</Text>
+                    </Button>
+                  )}
+                </View>
                 {errors.email && (
                   <Text className="text-destructive text-sm mt-1">
                     {errors.email.message}
                   </Text>
                 )}
               </View>
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="dateOfBirth"
-            render={({ field: { onChange, value } }) => (
-              <DatepickerInput value={value} onChange={onChange} />
             )}
           />
 
@@ -233,13 +246,12 @@ export default function Profile() {
         className="p-4 border-t border-border shadow-md shadow-border"
         style={{ marginBottom: bottom }}
       >
-        <Button
-          onPress={onSubmit}
-          disabled={(isSubmitted && !isValid) || mutation.isPending}
-        >
+        <Button onPress={onSubmit} disabled={isUpdatingUser}>
           <Text>Save</Text>
         </Button>
       </View>
+
+      <MailVerifyBottomSheet ref={mailVerifyBottomSheetRef} />
     </KeyboardAvoidingView>
   );
 }

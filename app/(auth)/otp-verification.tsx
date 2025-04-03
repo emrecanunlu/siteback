@@ -6,9 +6,9 @@ import { Text } from "~/components/ui/text";
 import { useEffect, useState } from "react";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLoginVerification } from "~/hooks/queries";
+import { useLoginOTP, useOtpVerify } from "~/hooks/queries";
 import { useAuth } from "~/providers/auth-providers";
-import AppLoader from "~/components/AppLoader";
+import { Button } from "~/components/ui/button";
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -21,29 +21,18 @@ const formatTime = (time: number) => {
 export default function OtpVerification() {
   const [timeLeft, setTimeLeft] = useState(60);
 
-  const { loading } = useAuth();
+  const { signIn } = useAuth();
   const { phoneNumber, code, isRegistered } = useLocalSearchParams<{
     phoneNumber: string;
     code: string;
     isRegistered: string;
   }>();
 
-  const { signIn } = useAuth();
-  const mutation = useLoginVerification();
+  const { mutate: resendCode, isPending: isResending } = useLoginOTP();
+  const { mutate: verifyCode, isPending: isVerifying } = useOtpVerify();
 
   const handleComplete = (otpCode: string) => {
-    if (isRegistered === "false") {
-      router.replace({
-        pathname: "/sign-up",
-        params: {
-          phoneNumber,
-          code,
-        },
-      });
-      return;
-    }
-
-    mutation.mutate(
+    verifyCode(
       {
         phone: phoneNumber,
         loginCode: otpCode,
@@ -51,7 +40,28 @@ export default function OtpVerification() {
       },
       {
         onSuccess: (response) => {
-          signIn(response.data!.accessToken, response.data!.refreshToken);
+          if (isRegistered === "true") {
+            signIn(response.data!.accessToken, response.data!.refreshToken);
+            return;
+          }
+
+          router.replace({
+            pathname: "/welcome",
+            params: {
+              phoneNumber,
+            },
+          });
+        },
+      }
+    );
+  };
+
+  const handleResendCode = () => {
+    resendCode(
+      { phone: phoneNumber },
+      {
+        onSuccess: () => {
+          setTimeLeft(60);
         },
       }
     );
@@ -69,7 +79,7 @@ export default function OtpVerification() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [timeLeft]);
 
   return (
     <SafeAreaView className="flex-1 mt-4">
@@ -92,17 +102,22 @@ export default function OtpVerification() {
           <OtpInput onComplete={handleComplete} />
         </View>
 
-        <Text className="text-muted-foreground font-medium text-sm mt-12">
-          Resend in:{" "}
-          <Text className="text-sm text-primary font-bold">
-            {formatTime(timeLeft)}
+        {(timeLeft > 0 && (
+          <Text className="text-muted-foreground font-medium text-sm mt-12">
+            Resend in:{" "}
+            <Text className="text-sm text-primary font-bold">
+              {formatTime(timeLeft)}
+            </Text>
           </Text>
-        </Text>
-
+        )) || (
+          <View className="mt-12 flex justify-start items-start">
+            <Button size="sm" onPress={handleResendCode} disabled={isResending}>
+              <Text>Resend Code</Text>
+            </Button>
+          </View>
+        )}
         <StatusBar style="dark" />
       </View>
-
-      <AppLoader loading={mutation.isPending || loading} />
     </SafeAreaView>
   );
 }

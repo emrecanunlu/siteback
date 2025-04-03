@@ -4,6 +4,10 @@ export const Images = {
   LogoLight: require("../assets/images/logo-light.png"),
 };
 
+export const Lotties = {
+  MailVerify: require("../assets/lotties/mail-verify.json"),
+};
+
 export const Icons = {
   Chaffeur: require("../assets/icons/chauffeur.png"),
   Pin: require("../assets/icons/pin.png"),

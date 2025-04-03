@@ -22,3 +22,8 @@ export const updateAvatar = async (formData: FormData) => {
   const response = await axios.post<ApiResult>("/User/UpdateAvatar", formData);
   return response.data;
 };
+
+export const verifyEmail = async () => {
+  const response = await axios.post<ApiResult>("/User/VerifyEmail");
+  return response.data;
+};

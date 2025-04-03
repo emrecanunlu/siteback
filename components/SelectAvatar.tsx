@@ -1,4 +1,4 @@
-import { View, Image } from "react-native";
+import { View } from "react-native";
 import { Button } from "./ui/button";
 import { User } from "~/lib/icons/User";
 import { Edit } from "~/lib/icons/Edit";

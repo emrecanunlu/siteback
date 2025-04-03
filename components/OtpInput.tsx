@@ -1,31 +1,47 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, TextInput } from "react-native";
-import { Input } from "./ui/input";
+import { View, TextInput, Platform } from "react-native";
+import { BottomSheetInput } from "./ui/bottomsheet-input";
 import { useKeyboard } from "~/lib/keyboard";
 
 interface OtpInputProps {
   onComplete?: (code: string) => void;
+  autofocus?: boolean;
 }
 
-export const OtpInput = ({ onComplete }: OtpInputProps) => {
+export const OtpInput = ({ onComplete, autofocus = false }: OtpInputProps) => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const inputRefs = useRef<TextInput[]>([]);
-
   const { dismissKeyboard } = useKeyboard();
 
   const handleChange = useCallback(
     (value: string, index: number) => {
       const newOtp = [...otp];
+
+      // iOS için OTP otomatik doldurma kontrolü
+      if (Platform.OS === "ios" && value.length > 1) {
+        const digits = value.split("");
+        digits.forEach((digit, i) => {
+          if (i < 6) {
+            newOtp[i] = digit;
+          }
+        });
+        setOtp(newOtp);
+
+        if (onComplete && digits.length === 6) {
+          onComplete(digits.join(""));
+          dismissKeyboard();
+        }
+        return;
+      }
+
       newOtp[index] = value;
       setOtp(newOtp);
 
-      // Sonraki input'a geç
       if (value && index < 5) {
         inputRefs.current[index + 1]?.focus();
       }
 
-      // Tüm inputlar dolduysa onComplete'i çağır
       if (newOtp.every((digit) => digit) && onComplete) {
         onComplete(newOtp.join(""));
         dismissKeyboard();
@@ -47,16 +63,17 @@ export const OtpInput = ({ onComplete }: OtpInputProps) => {
   );
 
   useEffect(() => {
-    // İlk input'a otomatik fokus
-    setTimeout(() => {
-      inputRefs.current[0]?.focus();
-    }, 100);
+    if (autofocus) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
   }, []);
 
   return (
     <View className="flex-row gap-x-3">
       {otp.map((digit, index) => (
-        <Input
+        <BottomSheetInput
           key={index}
           ref={(ref) => (inputRefs.current[index] = ref as TextInput)}
           className={`flex-1 aspect-square text-center rounded-xl ${
@@ -64,7 +81,7 @@ export const OtpInput = ({ onComplete }: OtpInputProps) => {
               ? "border-2 border-primary"
               : "border border-border"
           }`}
-          maxLength={1}
+          maxLength={Platform.OS === "ios" ? 6 : 1}
           keyboardType="number-pad"
           value={digit}
           onChangeText={(value) => handleChange(value, index)}
@@ -72,6 +89,7 @@ export const OtpInput = ({ onComplete }: OtpInputProps) => {
           onFocus={() => setFocusedIndex(index)}
           onBlur={() => setFocusedIndex(-1)}
           selectTextOnFocus
+          textContentType={Platform.OS === "ios" ? "oneTimeCode" : undefined}
         />
       ))}
     </View>

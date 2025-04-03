@@ -1,13 +1,21 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { loginOTP, loginVerification } from "~/services/auth-service";
+import {
+  loginOTP,
+  loginVerification,
+  otpVerify,
+} from "~/services/auth-service";
 import {
   createTrip,
   getNearestChauffeur,
   getTrips,
 } from "~/services/trip-service";
-import { updateAvatar, updateUser } from "~/services/user-service";
+import { updateAvatar, updateUser, verifyEmail } from "~/services/user-service";
 import { createVehicle, getVehicles } from "~/services/vehicle-service";
-import { LoginOTPRequest, LoginVerificationRequest } from "~/types/Auth";
+import {
+  LoginOTPRequest,
+  LoginVerificationRequest,
+  OtpVerifyRequest,
+} from "~/types/Auth";
 import { CreateTripDto } from "~/types/Trip";
 import { UpdateUserDto } from "~/types/User";
 import { CreateVehicleDto } from "~/types/Vehicle";
@@ -73,5 +81,19 @@ export const useGetTrips = (status: number) => {
   return useQuery({
     queryKey: ["getTrips", status],
     queryFn: () => getTrips(status),
+  });
+};
+
+export const useOtpVerify = () => {
+  return useMutation({
+    mutationKey: ["otpVerify"],
+    mutationFn: (data: OtpVerifyRequest) => otpVerify(data),
+  });
+};
+
+export const useVerifyEmail = () => {
+  return useMutation({
+    mutationKey: ["verifyEmail"],
+    mutationFn: () => verifyEmail(),
   });
 };
