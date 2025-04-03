@@ -13,15 +13,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import LottieView from "lottie-react-native";
 import { Lotties } from "~/config/assets";
 import React from "react";
+import { useVerifyEmailWithOtp } from "~/hooks/queries";
 
-type MailVerifyBottomSheetProps = {};
+type MailVerifyBottomSheetProps = {
+  onSuccess: () => void;
+};
 
 export const MailVerifyBottomSheet = forwardRef<
   BottomSheetModal,
   MailVerifyBottomSheetProps
 >((props, ref) => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { bottom } = useSafeAreaInsets();
+  const { mutate: verifyEmailWithOtp } = useVerifyEmailWithOtp();
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -36,7 +40,14 @@ export const MailVerifyBottomSheet = forwardRef<
   );
 
   const handleComplete = (otp: string) => {
-    console.log(otp);
+    verifyEmailWithOtp(otp, {
+      onSuccess: (response) => {
+        if (response.data) {
+          updateUser(response.data.tokenResponse, response.data.user);
+          props.onSuccess();
+        }
+      },
+    });
   };
 
   return (
@@ -67,7 +78,7 @@ export const MailVerifyBottomSheet = forwardRef<
           </View>
 
           <View className="mt-6">
-            <OtpInput onComplete={handleComplete} autofocus />
+            <OtpInput onComplete={handleComplete} autofocus isBottomSheet />
           </View>
         </View>
       </BottomSheetView>

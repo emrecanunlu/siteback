@@ -27,3 +27,17 @@ export const verifyEmail = async () => {
   const response = await axios.post<ApiResult>("/User/VerifyEmail");
   return response.data;
 };
+
+export const verifyEmailWithOtp = async (otp: string) => {
+  const response = await axios.post<
+    ApiResult<{
+      tokenResponse: LoginTokenResponse;
+      user: User;
+    }>
+  >("/User/VerifyCode", null, {
+    params: {
+      code: otp,
+    },
+  });
+  return response.data;
+};

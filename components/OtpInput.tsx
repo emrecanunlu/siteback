@@ -2,17 +2,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { View, TextInput, Platform } from "react-native";
 import { BottomSheetInput } from "./ui/bottomsheet-input";
 import { useKeyboard } from "~/lib/keyboard";
+import { Input } from "./ui/input";
 
 interface OtpInputProps {
   onComplete?: (code: string) => void;
   autofocus?: boolean;
+  isBottomSheet?: boolean;
 }
 
-export const OtpInput = ({ onComplete, autofocus = false }: OtpInputProps) => {
+export const OtpInput = ({
+  onComplete,
+  autofocus = false,
+  isBottomSheet = false,
+}: OtpInputProps) => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const inputRefs = useRef<TextInput[]>([]);
   const { dismissKeyboard } = useKeyboard();
+
+  const InputComponent = isBottomSheet ? BottomSheetInput : Input;
 
   const handleChange = useCallback(
     (value: string, index: number) => {
@@ -73,7 +81,7 @@ export const OtpInput = ({ onComplete, autofocus = false }: OtpInputProps) => {
   return (
     <View className="flex-row gap-x-3">
       {otp.map((digit, index) => (
-        <BottomSheetInput
+        <InputComponent
           key={index}
           ref={(ref) => (inputRefs.current[index] = ref as TextInput)}
           className={`flex-1 aspect-square text-center rounded-xl ${

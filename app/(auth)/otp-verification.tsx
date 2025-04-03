@@ -46,7 +46,7 @@ export default function OtpVerification() {
           }
 
           router.replace({
-            pathname: "/welcome",
+            pathname: "/sign-up",
             params: {
               phoneNumber,
             },
@@ -99,7 +99,7 @@ export default function OtpVerification() {
         <Text className="text-2xl font-bold mt-2">{phoneNumber}</Text>
 
         <View className="mt-8">
-          <OtpInput onComplete={handleComplete} />
+          <OtpInput onComplete={handleComplete} autofocus />
         </View>
 
         {(timeLeft > 0 && (

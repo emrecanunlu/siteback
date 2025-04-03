@@ -11,7 +11,7 @@ export type User = {
   avatarUrl: string | null;
   permissions: number[];
   roles: string[];
-  isMailVerified: boolean;
+  isEmailVerified: boolean;
 };
 
 export type UpdateUserDto = {

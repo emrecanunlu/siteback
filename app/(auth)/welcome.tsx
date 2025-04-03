@@ -14,14 +14,14 @@ import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import countries from "~/assets/countries.json";
 import { Input } from "~/components/ui/input";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "~/lib/icons/ChevronDown";
 import { router } from "expo-router";
 import { useLoginOTP } from "~/hooks/queries";
 import AppLoader from "~/components/AppLoader";
-import { OneSignal } from "react-native-onesignal";
 
 export default function Welcome() {
+  const [search, setSearch] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("TR");
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -58,6 +58,20 @@ export default function Welcome() {
       }
     );
   };
+
+  const filteredCountries = useMemo(() => {
+    return search.length > 0
+      ? countries.filter((c) =>
+          c.name.toLowerCase().includes(search.toLowerCase())
+        )
+      : countries;
+  }, [search]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSearch("");
+    }
+  }, [isOpen]);
 
   return (
     <View className="flex-1">
@@ -118,11 +132,11 @@ export default function Welcome() {
               <View className="flex-1 h-14 rounded-2xl bg-white/10 backdrop-blur-md px-4 justify-center">
                 <Input
                   className="flex-1 bg-transparent border-0 text-white placeholder:text-white/40 font-medium h-full text-lg -mt-0.5"
-                  placeholder="(555) 555 55 55"
-                  keyboardType="phone-pad"
+                  placeholder={isOpen ? "Search" : "(555) 555 55 55"}
+                  keyboardType={isOpen ? "default" : "phone-pad"}
                   returnKeyType="done"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
+                  value={isOpen ? search : phoneNumber}
+                  onChangeText={isOpen ? setSearch : setPhoneNumber}
                   onEndEditing={handleSubmit}
                 />
               </View>
@@ -131,7 +145,7 @@ export default function Welcome() {
 
           {isOpen && (
             <FlatList
-              data={countries}
+              data={filteredCountries}
               className="max-h-64 bg-white/10 backdrop-blur-md rounded-2xl mb-4"
               renderItem={({ item }) => (
                 <TouchableOpacity

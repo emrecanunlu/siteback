@@ -18,6 +18,7 @@ import { useUpdateUser, useVerifyEmail } from "~/hooks/queries";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { MailVerifyBottomSheet } from "~/components/MailVerifyBottomSheet";
 import yup from "~/lib/yup";
+import AppLoader from "~/components/AppLoader";
 
 const schema = yup.object({
   firstName: yup.string().required(),
@@ -73,7 +74,11 @@ export default function Profile() {
   });
 
   const handleVerifyEmail = () => {
-    mailVerifyBottomSheetRef.current?.present();
+    verifyEmail(undefined, {
+      onSuccess: () => {
+        mailVerifyBottomSheetRef.current?.present();
+      },
+    });
   };
 
   return (
@@ -166,6 +171,9 @@ export default function Profile() {
                     className="border-0 border-b border-border"
                     value={value}
                     onChangeText={onChange}
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    autoCorrect={false}
                     onBlur={onBlur}
                     placeholder="Email"
                     returnKeyType="done"
@@ -177,7 +185,7 @@ export default function Profile() {
                     }}
                   />
 
-                  {!user?.isMailVerified && (
+                  {!user?.isEmailVerified && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -251,7 +259,12 @@ export default function Profile() {
         </Button>
       </View>
 
-      <MailVerifyBottomSheet ref={mailVerifyBottomSheetRef} />
+      <MailVerifyBottomSheet
+        ref={mailVerifyBottomSheetRef}
+        onSuccess={() => mailVerifyBottomSheetRef.current?.dismiss()}
+      />
+
+      <AppLoader loading={isVerifyingEmail || isUpdatingUser} />
     </KeyboardAvoidingView>
   );
 }

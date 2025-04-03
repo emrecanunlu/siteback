@@ -99,7 +99,6 @@ const InitialLayout = () => {
 
 export default function RootLayout() {
   const hasMounted = React.useRef(false);
-  const { colorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
 
   useIsomorphicLayoutEffect(() => {
@@ -111,7 +110,7 @@ export default function RootLayout() {
       // Adds the background color to the html element to prevent white background on overscroll.
       document.documentElement.classList.add("bg-background");
     }
-    setAndroidNavigationBar(colorScheme);
+    setAndroidNavigationBar("light");
     setIsColorSchemeLoaded(true);
     hasMounted.current = true;
   }, []);
@@ -124,9 +123,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+          <ThemeProvider value={LIGHT_THEME}>
             <AuthProvider>
-              <StatusBar style={isDarkColorScheme ? "light" : "dark"} />
+              <StatusBar style="light" />
               <InitialLayout />
               <PortalHost />
             </AuthProvider>

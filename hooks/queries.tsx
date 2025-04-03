@@ -9,7 +9,12 @@ import {
   getNearestChauffeur,
   getTrips,
 } from "~/services/trip-service";
-import { updateAvatar, updateUser, verifyEmail } from "~/services/user-service";
+import {
+  updateAvatar,
+  updateUser,
+  verifyEmail,
+  verifyEmailWithOtp,
+} from "~/services/user-service";
 import { createVehicle, getVehicles } from "~/services/vehicle-service";
 import {
   LoginOTPRequest,
@@ -95,5 +100,12 @@ export const useVerifyEmail = () => {
   return useMutation({
     mutationKey: ["verifyEmail"],
     mutationFn: () => verifyEmail(),
+  });
+};
+
+export const useVerifyEmailWithOtp = () => {
+  return useMutation({
+    mutationKey: ["verifyEmailWithOtp"],
+    mutationFn: (otp: string) => verifyEmailWithOtp(otp),
   });
 };
