@@ -10,7 +10,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import yup from "~/lib/yup";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft } from "~/lib/icons/ChevronLeft";
-import { useLoginVerification } from "~/hooks/queries";
+import { useUpdateUser } from "~/hooks/queries";
 import { useAuth } from "~/providers/auth-providers";
 import AppLoader from "~/components/AppLoader";
 
@@ -23,12 +23,8 @@ const schema = yup.object({
 type FormData = yup.InferType<typeof schema>;
 
 export default function SignUp() {
-  const { loading, signIn } = useAuth();
-
-  const { phoneNumber, code } = useLocalSearchParams<{
-    phoneNumber: string;
-    code: string;
-  }>();
+  const { loading, updateUser } = useAuth();
+  const mutation = useUpdateUser();
 
   const lastNameRef = useRef<TextInput | null>(null);
   const emailRef = useRef<TextInput | null>(null);
@@ -47,22 +43,18 @@ export default function SignUp() {
     },
   });
 
-  const mutation = useLoginVerification();
-
   const onSubmit = (data: FormData) => {
     mutation.mutate(
       {
         firstname: data.firstName,
         lastname: data.lastName,
         email: data.email,
-        phone: phoneNumber,
-        loginCode: code,
-        rememberMe: true,
       },
       {
-        onError: (error) => {},
-        onSuccess: (response) => {
-          signIn(response.data!.accessToken, response.data!.refreshToken);
+        onSuccess: async (response) => {
+          if (!response.data) return;
+
+          updateUser(response.data.tokenResponse, response.data.user);
         },
       }
     );

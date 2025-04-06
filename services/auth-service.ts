@@ -37,7 +37,7 @@ export const refreshToken = async (data: RefreshTokenRequest) => {
 };
 
 export const otpVerify = async (data: OtpVerifyRequest) => {
-  const response = await httpClient.post<ApiResult<LoginTokenResponse>>(
+  const response = await httpClient.post<ApiResult<LoginTokenResponse | null>>(
     "/Auth/OtpVerify",
     data
   );

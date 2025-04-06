@@ -20,7 +20,7 @@ export type UpdateUserDto = {
   mobilePhone?: string;
   email: string;
   dateOfBirth?: string;
-  gender: Gender;
+  gender?: Gender;
 };
 
 export type NearestChauffeur = User & {

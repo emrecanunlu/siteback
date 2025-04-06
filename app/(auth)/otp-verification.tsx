@@ -9,6 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLoginOTP, useOtpVerify } from "~/hooks/queries";
 import { useAuth } from "~/providers/auth-providers";
 import { Button } from "~/components/ui/button";
+import AppLoader from "~/components/AppLoader";
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -21,7 +22,7 @@ const formatTime = (time: number) => {
 export default function OtpVerification() {
   const [timeLeft, setTimeLeft] = useState(60);
 
-  const { signIn } = useAuth();
+  const { signIn, setToken } = useAuth();
   const { phoneNumber, code, isRegistered } = useLocalSearchParams<{
     phoneNumber: string;
     code: string;
@@ -39,18 +40,16 @@ export default function OtpVerification() {
         rememberMe: true,
       },
       {
-        onSuccess: (response) => {
+        onSuccess: async (response) => {
+          if (!response.data) return;
+
           if (isRegistered === "true") {
-            signIn(response.data!.accessToken, response.data!.refreshToken);
+            signIn(response.data);
             return;
           }
 
-          router.replace({
-            pathname: "/sign-up",
-            params: {
-              phoneNumber,
-            },
-          });
+          setToken(response.data);
+          router.replace("/sign-up");
         },
       }
     );
@@ -118,6 +117,8 @@ export default function OtpVerification() {
         )}
         <StatusBar style="dark" />
       </View>
+
+      <AppLoader loading={isResending || isVerifying} />
     </SafeAreaView>
   );
 }

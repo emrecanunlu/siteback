@@ -8,10 +8,11 @@ import { LoginTokenResponse } from "~/types/Auth";
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signIn: (accessToken: string, refreshToken: string) => void;
+  signIn: (tokenResponse: LoginTokenResponse) => void;
   signOut: () => void;
   updateUser: (tokenResponse: LoginTokenResponse, user: User) => void;
   refreshToken: () => void;
+  setToken: (tokenResponse: LoginTokenResponse) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,11 +40,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signIn = async (accessToken: string, refreshToken: string) => {
-    await AsyncStorage.setItem("accessToken", accessToken);
-    await AsyncStorage.setItem("refreshToken", refreshToken);
+  const signIn = async (tokenResponse: LoginTokenResponse) => {
+    await setToken(tokenResponse);
 
     await getUserCredentials();
+  };
+
+  const setToken = async (tokenResponse: LoginTokenResponse) => {
+    await AsyncStorage.setItem("accessToken", tokenResponse.accessToken);
+    await AsyncStorage.setItem("refreshToken", tokenResponse.refreshToken);
   };
 
   const updateUser = async (tokenResponse: LoginTokenResponse, user: User) => {
@@ -91,7 +96,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signIn, signOut, updateUser, refreshToken }}
+      value={{
+        user,
+        loading,
+        signIn,
+        signOut,
+        updateUser,
+        refreshToken,
+        setToken,
+      }}
     >
       {children}
     </AuthContext.Provider>
