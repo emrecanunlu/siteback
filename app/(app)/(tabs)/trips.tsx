@@ -83,13 +83,13 @@ export default function Trips() {
 
                 <CardContent>
                   <Text className="font-medium text-primary" numberOfLines={1}>
-                    From, {item.pickupLocation}
+                    From, {item.dropoffLocation}
                   </Text>
                   <Text
                     className="text-sm text-muted-foreground"
                     numberOfLines={1}
                   >
-                    To, {item.dropoffLocation}
+                    To, {item.pickupLocation}
                   </Text>
                 </CardContent>
 
